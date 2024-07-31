@@ -52,8 +52,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // });
 var pool = mysql2.createPool({
     host: `146.190.60.247`,
-    user: `admin`,
-    password: `47d511d7454a5747c7e54555aaeb2dc5d638ad6400ecf33c`,
+    user: `wipsite_startupkit`,
+    password: `NWYV!(ymnNVU`,
     database: `wipsite_startupkit_react`,
     port: 3306,
     // multipleStatements : true,
