@@ -41,12 +41,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 var pool = mysql2.createPool({
-    connectionLimit: 10,
     host: `wipsite.in`,
     user: `wipsite_startupkit`,
     password: `NWYV!(ymnNVU`,
     database: `wipsite_startupkit_react`,
     port: 3306,
+    multipleStatements : true,
+    connectionLimit: 10,
+    acquireTimeout: 30000,
 });
 
 
@@ -81,7 +83,7 @@ async function getsql() {
     return result;
 }
 
-const port = 8000;
+const port = 8001;
 const host = '0.0.0.0';
 
 app.get('/ping', (req, res) => {
