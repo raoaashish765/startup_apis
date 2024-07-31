@@ -84,14 +84,14 @@ async function getsql() {
 }
 
 const port = 8001;
-const host = '0.0.0.0';
+// const host = '0.0.0.0';
 
 app.get('/ping', (req, res) => {
     console.log("server is alive!!");
     res.send('Pong');
 });
 
-app.listen(port, host, () => {
+app.listen(port, () => {
     // console.log(`server started on port: ${port}`);
     const networkInterfaces = os.networkInterfaces();
     let localIP = 'localhost';
