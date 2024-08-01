@@ -11,16 +11,13 @@ const nodemailer = require('nodemailer')
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const randomColor = require('randomcolor');
-const os = require('os');
 
 
 // Serve static files from the 'public' directory
 app.use("/public", express.static('public'));
 
 
-const mysql2 = require('mysql2/promise.js');
-// const mysql = require('mysql/index.js');
-
+const mysql = require('mysql2');
 
 // Allow all CORS requests
 app.use(cors());
@@ -40,26 +37,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // }).promise();
 
 
-// var pool = mysql2.createPool({
-//     host: `wipsite.in`,
-//     user: `wipsite_startupkit`,
-//     password: `NWYV!(ymnNVU`,
-//     database: `wipsite_startupkit_react`,
-//     port: 3306,
-//     // multipleStatements : true,
-//     // connectionLimit: 10,
-//     // acquireTimeout: 30000,
-// });
-var pool = mysql2.createPool({
+const pool = mysql.createPool({
     host: `146.190.60.247`,
     user: `wipsite_startupkit`,
     password: `NWYV!(ymnNVU`,
     database: `wipsite_startupkit_react`,
     port: 3306,
-    // multipleStatements : true,
-    // connectionLimit: 10,
-    // acquireTimeout: 30000,
-});
+}).promise();
 
 
 // let pool;
@@ -84,41 +68,24 @@ var pool = mysql2.createPool({
 //     process.exit(1); // Exit with failure code
 // }
 
-
+// const result = await pool.query("SELECT * FROM vue_database")
+// console.log(result);
 
 async function getsql() {
-    const result = await pool.query("SELECT * FROM users");
-    console.log(result);
+    const result = await pool.query("SELECT * FROM users")
     return result;
 }
 
-const port = 8001;
-// const host = '0.0.0.0';
+const port = 8000;
+const host = '0.0.0.0';
 
 app.get('/ping', (req, res) => {
     console.log("server is alive!!");
     res.send('Pong');
 });
 
-app.listen(port, () => {
-    // console.log(`server started on port: ${port}`);
-    const networkInterfaces = os.networkInterfaces();
-    let localIP = 'localhost';
-    
-    for (const iface in networkInterfaces) {
-        for (const details of networkInterfaces[iface]) {
-            if (details.family === 'IPv4' && !details.internal) {
-                localIP = details.address;
-                break;
-            }
-        }
-    }
-
-    // Construct the URL
-    const url = `http://${localIP}:${port}`;
-
-    console.log(`Server started on port: ${port}`);
-    console.log(`Access it at: ${url}`);
+app.listen(port, host, () => {
+    console.log(`server started on port: ${port}`);
 })
 
 app.get('/', (req, res) => {
@@ -139,7 +106,6 @@ app.get('/pages/:pageid', async (req, res) => {
 
     try {
         // const [rows] = await pool.query('SELECT * FROM pages WHERE page_name = ?', [pageid]);
-        // return lenght
         const [rows] = await pool.query('SELECT * FROM pages WHERE page_name = Home');
         return res.json(rows.length);
 
@@ -1510,19 +1476,6 @@ app.get('/api/alltemplates', async (req, res) => {
         console.error('Error fetching page data:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-});
-
-app.get('/testtemp', async (req, res) => {
-    const [rows] = await pool.query('SELECT * FROM templates');
-
-    if (rows.length === 0) {
-        res.status(404).json({ message: 'Page not found' });
-    } else {
-        console.log("request sent back");
-        // console.log(rows);
-        res.json(rows);
-    }
-
 });
 
 app.post('/api/addnewpage', async (req, res) => {
