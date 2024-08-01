@@ -105,9 +105,8 @@ app.get('/pages/:pageid', async (req, res) => {
     const pageid = req.params.pageid; // Get secid from URL parameter
 
     try {
-        // const [rows] = await pool.query('SELECT * FROM pages WHERE page_name = ?', [pageid]);
-        const [rows] = await pool.query('SELECT * FROM pages WHERE page_name = Home');
-        return res.json(rows.length);
+        const [rows] = await pool.query('SELECT * FROM pages WHERE page_name = ?', [pageid]);
+        // return res.json(rows.length);
 
         if (rows.length === 0) {
             res.status(404).json({ message: 'Section not found' });
@@ -117,12 +116,7 @@ app.get('/pages/:pageid', async (req, res) => {
             // console.log("done...");
         }
     } catch (error) {
-        console.error('Error fetching section data:', {
-            message: error.message,
-            stack: error.stack,
-            query: 'SELECT * FROM pages WHERE page_name = ?',
-            params: [pageid]
-        });
+        console.error('Error fetching section data:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
