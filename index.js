@@ -1526,6 +1526,8 @@ app.get('/api/testingnow', async (req, res) => {
         const ipAddress = req.connection.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
         // const xForwardedFor = req.headers['x-forwarded-for'];
+        console.log(req);
+        
 
         // Return success message and the newly added row
         res.status(200).json({
