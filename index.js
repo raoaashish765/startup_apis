@@ -1518,3 +1518,24 @@ app.post('/api/thepagesdel', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+app.get('/api/testingnow', async (req, res) => {
+    try {
+        const userAgent = req.headers['user-agent'];
+        const ipAddress = req.connection.remoteAddress;
+        const ipAddress2 = req.socket.remoteAddress;
+
+        console.log('User-Agent:', userAgent);
+        console.log('Client IP Address:', ipAddress);
+        console.log('Client IP Address2:', ipAddress2);
+
+        // Return success message and the newly added row
+        res.status(200).json({
+            message: 'success',
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
