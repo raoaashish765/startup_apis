@@ -1519,10 +1519,12 @@ app.post('/api/thepagesdel', async (req, res) => {
     }
 });
 
+app.set('trust proxy', true);
+
 app.get('/api/testingnow', async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'];
-        const ipAddress = req.connection.remoteAddress;
+        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
 
         console.log('User-Agent:', userAgent);
