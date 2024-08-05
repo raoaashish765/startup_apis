@@ -1533,6 +1533,9 @@ app.get('/api/testingnow', async (req, res) => {
         // Return success message and the newly added row
         res.status(200).json({
             message: 'success',
+            message: userAgent,
+            message: ipAddress,
+            message: ipAddress2,
         });
 
     } catch (error) {
