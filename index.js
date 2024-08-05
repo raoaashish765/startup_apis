@@ -1534,6 +1534,7 @@ app.get('/api/testingnow', async (req, res) => {
             message2: ipAddress,
             message3: ipAddress2,
             message4: xForwardedFor,
+            message5: req,
         });
 
     } catch (error) {
