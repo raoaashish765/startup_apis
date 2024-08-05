@@ -1523,14 +1523,14 @@ var savedhashes = [];
 
 app.get('/api/testingnow', async (req, res) => {
     try {
-        // const usr = "aashish";
-        // const role = "superadmin";
+        const usr = "aashish";
+        const role = "superadmin";
         const userAgent = req.headers['user-agent'];
         const xForwardedFor = req.headers['x-forwarded-for'];
         // const secretKey = crypto.randomBytes(32).toString('hex');
         // const token = jwt.sign({ usr, role }, secretKey, { expiresIn: '24h' });
 
-        const combinedString = `${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
+        const combinedString = `${usr}:${role}:${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
         const hash = crypto.createHash('sha256');
         hash.update(combinedString);
         const newHash = hash.digest('hex');
@@ -1542,6 +1542,8 @@ app.get('/api/testingnow', async (req, res) => {
             savedhashes.push(newHash);
             themss = "hash stored successfully";
         }
+        console.log(savedhashes);
+        
 
         // Return success message and the newly added row
         res.status(200).json({
