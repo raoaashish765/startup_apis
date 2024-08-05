@@ -1530,6 +1530,7 @@ app.get('/api/testingnow', async (req, res) => {
         console.log('User-Agent:', userAgent);
         console.log('Client IP Address:', ipAddress);
         console.log('Client IP Address2:', ipAddress2);
+        console.log('the request:', req);
 
         // Return success message and the newly added row
         res.status(200).json({
