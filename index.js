@@ -1526,8 +1526,9 @@ function checkuserauth(req) {
     const role = "superadmin";
     const userAgent = req.headers['user-agent'];
     const xForwardedFor = req.headers['x-forwarded-for'];
+    const buffertext = "H3Y2CugHkuz9XRDESw0cxKQMCN43KM"
 
-    const combinedString = `${usr}:${role}:${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
+    const combinedString = `${buffertext}:${usr}:${role}:${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
     const hash = crypto.createHash('sha256');
     hash.update(combinedString);
     const newHash = hash.digest('hex');
@@ -1557,6 +1558,21 @@ app.get('/api/testingnow', async (req, res) => {
 
         // Return success message and the newly added row
         res.status(200).json(theret);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+app.post('/api/testingnowpost', async (req, res) => {
+    try {
+        // const theret = checkuserauth(req);
+
+        console.log("testingnowpost is working....");
+
+
+        // Return success message and the newly added row
+        res.status(200).json({message: "success!!"});
 
     } catch (error) {
         console.error(error);
