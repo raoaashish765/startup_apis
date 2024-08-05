@@ -1525,7 +1525,7 @@ app.get('/api/testingnow', async (req, res) => {
         const userAgent = req.headers['user-agent'];
         const ipAddress = req.connection.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
-        // const xForwardedFor = req.headers['x-forwarded-for'];
+        const xForwardedFor = req.headers['x-forwarded-for'];
         console.log(req);
         
 
@@ -1533,7 +1533,7 @@ app.get('/api/testingnow', async (req, res) => {
         res.status(200).json({
             message: 'success',
             message1: userAgent,
-            message5: req[0],
+            message5: xForwardedFor.split(',')[0].trim(),
         });
 
     } catch (error) {
