@@ -1531,7 +1531,7 @@ app.get('/api/testingnow', async (req, res) => {
         res.status(200).json({
             message: 'success',
             message1: userAgent,
-            message5: req,
+            message5: req[0],
         });
 
     } catch (error) {
