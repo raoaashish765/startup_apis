@@ -1525,10 +1525,7 @@ app.get('/api/testingnow', async (req, res) => {
         const userAgent = req.headers['user-agent'];
         const ipAddress = req.connection.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
-
-        console.log('User-Agent:', userAgent);
-        console.log('Client IP Address:', ipAddress);
-        console.log('Client IP Address2:', ipAddress2);
+        const xForwardedFor = req.headers['x-forwarded-for'];
 
         // Return success message and the newly added row
         res.status(200).json({
@@ -1536,6 +1533,7 @@ app.get('/api/testingnow', async (req, res) => {
             message1: userAgent,
             message2: ipAddress,
             message3: ipAddress2,
+            message4: xForwardedFor,
         });
 
     } catch (error) {
