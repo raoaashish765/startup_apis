@@ -1519,20 +1519,36 @@ app.post('/api/thepagesdel', async (req, res) => {
     }
 });
 
+var savedhashes = [];
 
 app.get('/api/testingnow', async (req, res) => {
     try {
+        // const usr = "aashish";
+        // const role = "superadmin";
         const userAgent = req.headers['user-agent'];
-        const ipAddress = req.socket.remoteAddress;
         const xForwardedFor = req.headers['x-forwarded-for'];
-        
+        // const secretKey = crypto.randomBytes(32).toString('hex');
+        // const token = jwt.sign({ usr, role }, secretKey, { expiresIn: '24h' });
+
+        const combinedString = `${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
+        const hash = crypto.createHash('sha256');
+        hash.update(combinedString);
+        const newHash = hash.digest('hex');
+
+        let themss;
+        if (savedhashes.includes(newHash)) {
+            themss = "duplicate hash";
+        } else {
+            savedhashes.push(newHash);
+            themss = "hash stored successfully";
+        }
 
         // Return success message and the newly added row
         res.status(200).json({
-            message: 'success',
+            message: themss,
             message1: userAgent,
-            message2: ipAddress,
-            message5: xForwardedFor.split(',')[0].trim(),
+            message2: xForwardedFor.split(',')[0].trim(),
+            message3: newHash,
         });
 
     } catch (error) {
