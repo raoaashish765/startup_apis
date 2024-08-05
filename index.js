@@ -1521,37 +1521,42 @@ app.post('/api/thepagesdel', async (req, res) => {
 
 var savedhashes = [];
 
+function checkuserauth(req) {
+    const usr = "aashish";
+    const role = "superadmin";
+    const userAgent = req.headers['user-agent'];
+    const xForwardedFor = req.headers['x-forwarded-for'];
+
+    const combinedString = `${usr}:${role}:${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
+    const hash = crypto.createHash('sha256');
+    hash.update(combinedString);
+    const newHash = hash.digest('hex');
+
+    let themss;
+    if (savedhashes.includes(newHash)) {
+        themss = "duplicate hash";
+    } else {
+        savedhashes.push(newHash);
+        themss = "hash stored successfully";
+    }
+
+    return {
+        message: themss,
+        message1: userAgent,
+        message2: xForwardedFor.split(',')[0].trim(),
+        message3: newHash,
+    }
+}
+
 app.get('/api/testingnow', async (req, res) => {
     try {
-        const usr = "aashish";
-        const role = "superadmin";
-        const userAgent = req.headers['user-agent'];
-        const xForwardedFor = req.headers['x-forwarded-for'];
-        // const secretKey = crypto.randomBytes(32).toString('hex');
-        // const token = jwt.sign({ usr, role }, secretKey, { expiresIn: '24h' });
+        const theret = checkuserauth(req);
 
-        const combinedString = `${usr}:${role}:${userAgent}:${xForwardedFor.split(',')[0].trim()}`;
-        const hash = crypto.createHash('sha256');
-        hash.update(combinedString);
-        const newHash = hash.digest('hex');
-
-        let themss;
-        if (savedhashes.includes(newHash)) {
-            themss = "duplicate hash";
-        } else {
-            savedhashes.push(newHash);
-            themss = "hash stored successfully";
-        }
         console.log(savedhashes);
-        
+
 
         // Return success message and the newly added row
-        res.status(200).json({
-            message: themss,
-            message1: userAgent,
-            message2: xForwardedFor.split(',')[0].trim(),
-            message3: newHash,
-        });
+        res.status(200).json(theret);
 
     } catch (error) {
         console.error(error);
