@@ -1522,9 +1522,11 @@ app.post('/api/thepagesdel', async (req, res) => {
 app.get('/api/testingnow', async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'];
+        const ipAddress = req.connection.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
 
         console.log('User-Agent:', userAgent);
+        console.log('Client IP Address:', ipAddress);
         console.log('Client IP Address2:', ipAddress2);
 
         // Return success message and the newly added row
