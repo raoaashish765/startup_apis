@@ -1523,7 +1523,7 @@ app.post('/api/thepagesdel', async (req, res) => {
 app.get('/api/testingnow', async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'];
-        const ipAddress = req.connection.remoteAddress;
+        const ipAddress = req.socket.remoteAddress;
         const xForwardedFor = req.headers['x-forwarded-for'];
         
 
