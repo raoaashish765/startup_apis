@@ -1531,9 +1531,6 @@ app.get('/api/testingnow', async (req, res) => {
         res.status(200).json({
             message: 'success',
             message1: userAgent,
-            message2: ipAddress,
-            message3: ipAddress2,
-            // message4: xForwardedFor,
             message5: req,
         });
 
