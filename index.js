@@ -1519,18 +1519,16 @@ app.post('/api/thepagesdel', async (req, res) => {
     }
 });
 
-app.set('trust proxy', true);
 
 app.get('/api/testingnow', async (req, res) => {
     try {
         const userAgent = req.headers['user-agent'];
-        const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
+        const ipAddress = req.connection.remoteAddress;
         const ipAddress2 = req.socket.remoteAddress;
 
         console.log('User-Agent:', userAgent);
         console.log('Client IP Address:', ipAddress);
         console.log('Client IP Address2:', ipAddress2);
-        console.log('the request:', req);
 
         // Return success message and the newly added row
         res.status(200).json({
