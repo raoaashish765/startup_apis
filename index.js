@@ -1730,7 +1730,7 @@ app.post("/crmapis/tokenverify", async (req, res) => {
     if (existingUsers[0].role !== role) {
       console.log("User role didn't match.......");
       return res
-        .status(500)
+        .status(401)
         .json({ data: { errors: "User role didn't match.", loggedin: false } });
     }
     // creating a hash
@@ -1745,7 +1745,7 @@ app.post("/crmapis/tokenverify", async (req, res) => {
     if (checktoken !== token) {
       console.log("checktoken : ", checktoken, "____,____ token : ", token);
       return res
-        .status(500)
+        .status(401)
         .json({
           data: { errors: "User token didn't match.", loggedin: false },
         });
