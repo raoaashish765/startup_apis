@@ -1716,6 +1716,54 @@ app.post("/crmapis/login", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+app.post("/crmapis/tokenverify", async (req, res) => {
+  try {
+    // log details
+    const { token, user, role } = req.body;
+    console.log(token, user, role);
+    // Check if username or email already exists in the database
+    const [existingUsers] = await pool.query(
+      "SELECT * FROM users WHERE username = ?",
+      [user]
+    );
+    // return 401 error if user don't exists
+    if (existingUsers[0].role !== role) {
+      console.log("User role didn't match.......");
+      return res
+        .status(500)
+        .json({ data: { errors: "User role didn't match.", loggedin: false } });
+    }
+    // creating a hash
+    const userAgent = req.headers["user-agent"];
+    const xForwardedFor = req.headers["x-forwarded-for"].split(",")[0].trim();
+    const checktoken = createHash(
+      existingUsers[0].password,
+      existingUsers[0].username,
+      userAgent,
+      xForwardedFor
+    );
+    if (checktoken !== token) {
+      console.log("checktoken : ", checktoken, "____,____ token : ", token);
+      return res
+        .status(500)
+        .json({
+          data: { errors: "User token didn't match.", loggedin: false },
+        });
+    }
+
+    // Successful login
+    res.status(200).json({
+      data: {
+        checktoken: checktoken,
+        token: token,
+        success: "token matched successfully!",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 app.get("/api/testingdash", async (req, res) => {
   try {
