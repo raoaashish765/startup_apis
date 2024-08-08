@@ -4,6 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const fs = require("fs");
+const http = require("http");
 const https = require("https");
 const querystring = require("querystring");
 const jwt = require("jsonwebtoken");
@@ -1696,10 +1697,10 @@ app.post("/crmapis/login", async (req, res) => {
       xForwardedFor
     );
 
-    // await pool.query(
-    //   "UPDATE users SET api_token = ? WHERE username = ? OR email = ?",
-    //   [token, existingUsers[0].username, existingUsers[0].email]
-    // );
+    await pool.query(
+      "UPDATE users SET api_token = ? WHERE username = ?",
+      [token, existingUsers[0].username]
+    );
 
     // Successful login
     res.status(200).json({
@@ -1777,4 +1778,60 @@ app.get("/api/testingdash", async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
+});
+
+
+const appsocket = express();
+const server = http.createServer(appsocket);
+const { Server } = require("socket.io");
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+appsocket.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
+io.on('connection', (socket) => {
+  console.log('A new user connected', socket.id);
+
+  socket.on('message', (msg) => {
+    console.log('Message received:', msg);
+    io.emit('message', msg); // Broadcast the message to all connected clients
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected', socket.id);
+  });
+});
+
+server.listen(9000, host, () => {
+  console.log(`WebSocket server started on port: ${9000}`);
+});
+
+appsocket.get("/", (req, res) => {
+  res.send("Welcome.. Sockets are Working!!");
+});
+
+// Example of emitting a message from an HTTP GET request
+appsocket.get("/handelmessageget", (req, res) => {
+  // Emit a message to all connected WebSocket clients
+  io.emit('message', 'Data updated via GET request');
+  
+  // Respond to the HTTP request
+  res.send("Data updated via GET request!");
+});
+
+// Example of emitting a message from an HTTP POST request
+appsocket.post("/handelmessagepost", (req, res) => {
+  // Emit a message to all connected WebSocket clients
+  io.emit('message', 'Data updated via POST request');
+  
+  // Respond to the HTTP request
+  res.send("Data updated via POST request!");
 });
