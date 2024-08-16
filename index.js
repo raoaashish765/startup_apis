@@ -10,6 +10,7 @@ const querystring = require("querystring");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const randomColor = require("randomcolor");
+const cookie = require("cookie");
 
 // Serve static files from the 'public' directory
 app.use("/public", express.static("public"));
@@ -70,7 +71,7 @@ app.get("/pages/:pageid", async (req, res) => {
   const pageid = req.params.pageid; // Get secid from URL parameter
 
   try {
-    const [rows] = await pool.query("SELECT * FROM pages WHERE page_name = ?", [
+    const [rows] = await pool.query("SELECT * FROM pages WHERE url = ?", [
       pageid,
     ]);
     // return res.json(rows.length);
@@ -1536,9 +1537,23 @@ app.get("/api/alltemplates", async (req, res) => {
   }
 });
 
+
+function convertToSlug(text) {
+  return text
+      .toString()                     // Convert to string
+      .toLowerCase()                 // Convert to lowercase
+      .normalize('NFD')              // Normalize unicode characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9 -]/g, '')   // Remove invalid characters
+      .replace(/\s+/g, '-')          // Replace spaces with dashes
+      .replace(/-+/g, '-');          // Replace multiple dashes with a single dash
+}
+
+
 app.post("/api/addnewpage", async (req, res) => {
   try {
     const { newname, selecttemp } = req.body;
+    const urlslug = convertToSlug(newname);
     const creator_name = req.headers.user;
 
     const [the_template] = await pool.query(
@@ -1554,7 +1569,7 @@ app.post("/api/addnewpage", async (req, res) => {
         newname,
         the_template[0].content,
         creator_name,
-        "/" + newname,
+        "/" + urlslug,
         selecttemp,
       ]
     );
@@ -1594,244 +1609,3 @@ app.post("/api/thepagesdel", async (req, res) => {
 // -------------------------------------End of startup apis--------------------------------------------------
 // -------------------------------------End of startup apis--------------------------------------------------
 // -------------------------------------End of startup apis--------------------------------------------------
-
-// -------------------------------------START of CRM apis--------------------------------------------------
-// -------------------------------------START of CRM apis--------------------------------------------------
-
-var savedhashes = [];
-
-function createHash(buffertext, username, agent, userip) {
-  console.log(buffertext, username, agent, userip);
-  const combinedString = `${buffertext}:${username}:${agent}:${userip}`;
-  const hash = crypto.createHash("sha256");
-  hash.update(combinedString);
-  return hash.digest("hex");
-}
-
-function checkuserauth(req) {
-  const usr = "aashish";
-  const role = "superadmin";
-  const userAgent = req.headers["user-agent"];
-  const xForwardedFor = req.headers["x-forwarded-for"];
-  const buffertext = "H3Y2CugHkuz9XRDESw0cxKQMCN43KM";
-
-  const combinedString = `${buffertext}:${usr}:${role}:${userAgent}:${xForwardedFor
-    .split(",")[0]
-    .trim()}`;
-  const hash = crypto.createHash("sha256");
-  hash.update(combinedString);
-  const newHash = hash.digest("hex");
-
-  let themss;
-  if (savedhashes.includes(newHash)) {
-    themss = "duplicate hash";
-  } else {
-    savedhashes.push(newHash);
-    themss = "hash stored successfully";
-  }
-
-  return {
-    message: themss,
-    message1: userAgent,
-    message2: xForwardedFor.split(",")[0].trim(),
-    message3: newHash,
-  };
-}
-
-app.get("/crmapis/testingnow", async (req, res) => {
-  try {
-    const theret = checkuserauth(req);
-
-    console.log(savedhashes);
-
-    // Return success message and the newly added row
-    res.status(200).json(theret);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-app.post("/crmapis/login", async (req, res) => {
-  try {
-    // Check credentials
-    const { email, password } = req.body;
-    console.log(email, password);
-    // Check if username or email already exists in the database
-    const [existingUsers] = await pool.query(
-      "SELECT * FROM users WHERE username = ? OR email = ?",
-      [email, email]
-    );
-    // return 401 error if user don't exists
-    if (existingUsers.length == 0) {
-      console.log("User didn't exists.......", existingUsers.length);
-      return res
-        .status(401)
-        .json({ data: { errors: "User didn't exists.", loggedin: false } });
-    }
-    // if (existingUsers[0].account_status != "active") {
-    //   console.log("Unfortunately your account is suspended.......");
-    //   console.log(existingUsers.length);
-    //   return res
-    //     .status(500)
-    //     .json({
-    //       data: {
-    //         errors: "Unfortunately your account is suspended.",
-    //         loggedin: false,
-    //       },
-    //     });
-    // }
-    // return 401 error if password is incorrect
-    if (existingUsers[0].password != password) {
-      console.log("Password is incorrect.......");
-      return res
-        .status(401)
-        .json({ data: { errors: "Password is incorrect.", loggedin: false } });
-    }
-    // creating a hash
-    const userAgent = req.headers["user-agent"];
-    const xForwardedFor = req.headers["x-forwarded-for"].split(",")[0].trim();
-    const token = createHash(
-      existingUsers[0].password,
-      existingUsers[0].username,
-      userAgent,
-      xForwardedFor
-    );
-
-    await pool.query(
-      "UPDATE users SET api_token = ? WHERE username = ?",
-      [token, existingUsers[0].username]
-    );
-
-    // Successful login
-    res.status(200).json({
-      data: {
-        email: email,
-        role: existingUsers[0].role,
-        token: token,
-        loggedin: true,
-        success: "Login was successfully!",
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-app.post("/crmapis/tokenverify", async (req, res) => {
-  try {
-    // log details
-    const { token, user, role } = req.body;
-    console.log(token, user, role);
-    // Check if username or email already exists in the database
-    const [existingUsers] = await pool.query(
-      "SELECT * FROM users WHERE username = ?",
-      [user]
-    );
-    // return 401 error if user don't exists
-    if (existingUsers[0].role !== role) {
-      console.log("User role didn't match.......");
-      return res
-        .status(401)
-        .json({ data: { errors: "User role didn't match.", loggedin: false } });
-    }
-    // creating a hash
-    const userAgent = req.headers["user-agent"];
-    const xForwardedFor = req.headers["x-forwarded-for"].split(",")[0].trim();
-    const checktoken = createHash(
-      existingUsers[0].password,
-      existingUsers[0].username,
-      userAgent,
-      xForwardedFor
-    );
-    if (checktoken !== token) {
-      console.log("checktoken : ", checktoken, "____,____ token : ", token);
-      return res
-        .status(401)
-        .json({
-          data: { errors: "User token didn't match.", loggedin: false },
-        });
-    }
-
-    // Successful login
-    res.status(200).json({
-      data: {
-        checktoken: checktoken,
-        token: token,
-        success: "token matched successfully!",
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-app.get("/api/testingdash", async (req, res) => {
-  try {
-    const theret = checkuserauth(req);
-
-    console.log(savedhashes);
-
-    // Return success message and the newly added row
-    res.status(200).json(theret);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-
-const appsocket = express();
-const server = http.createServer(appsocket);
-const { Server } = require("socket.io");
-
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
-appsocket.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
-
-io.on('connection', (socket) => {
-  console.log('A new user connected', socket.id);
-
-  socket.on('message', (msg) => {
-    console.log('Message received:', msg);
-    io.emit('message', msg); // Broadcast the message to all connected clients
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected', socket.id);
-  });
-});
-
-server.listen(9000, host, () => {
-  console.log(`WebSocket server started on port: ${9000}`);
-});
-
-appsocket.get("/", (req, res) => {
-  res.send("Welcome.. Sockets are Working!!");
-});
-
-// Example of emitting a message from an HTTP GET request
-appsocket.get("/handelmessageget", (req, res) => {
-  // Emit a message to all connected WebSocket clients
-  io.emit('message', 'Data updated via GET request');
-  
-  // Respond to the HTTP request
-  res.send("Data updated via GET request!");
-});
-
-// Example of emitting a message from an HTTP POST request
-appsocket.post("/handelmessagepost", (req, res) => {
-  // Emit a message to all connected WebSocket clients
-  io.emit('message', 'Data updated via POST request');
-  
-  // Respond to the HTTP request
-  res.send("Data updated via POST request!");
-});
