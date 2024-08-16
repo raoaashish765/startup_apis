@@ -72,7 +72,7 @@ app.get("/pages/:pageid", async (req, res) => {
 
   try {
     const [rows] = await pool.query("SELECT * FROM pages WHERE url = ?", [
-      pageid,
+      '/'+pageid,
     ]);
     // return res.json(rows.length);
 
