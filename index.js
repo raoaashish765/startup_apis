@@ -70,13 +70,8 @@ app.get("/users", async (req, res) => {
 app.get("/pages/:pageid", async (req, res) => {
   const pageid = req.params.pageid; // Get secid from URL parameter
 
-  let fetchurl = '/'+pageid;
-  if (pageid === 1) {
-    fetchurl = '/';
-  }
-
   try {
-    const [rows] = await pool.query("SELECT * FROM pages WHERE url = ?", [fetchurl]);
+    const [rows] = await pool.query("SELECT * FROM pages WHERE page_name = ?", [pageid]);
     
     // return res.json(rows.length);
 
