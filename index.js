@@ -67,7 +67,7 @@ app.get("/users", async (req, res) => {
   }
 });
 
-app.get("/pages/:pageid", async (req, res) => {
+app.get("/pagesfront/:pageid", async (req, res) => {
   const pageid = req.params.pageid; // Get secid from URL parameter
 
   try {
