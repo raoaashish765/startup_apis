@@ -1551,6 +1551,8 @@ function convertToSlug(text) {
 
 app.post("/api/addnewpage", async (req, res) => {
   try {
+    console.log("add new page called...");
+    
     const { newname, selecttemp } = req.body;
     const urlslug = convertToSlug(newname);
     console.log("new page url is ::: ", urlslug);
