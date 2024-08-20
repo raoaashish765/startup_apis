@@ -1553,6 +1553,8 @@ app.post("/api/addnewpage", async (req, res) => {
   try {
     const { newname, selecttemp } = req.body;
     const urlslug = convertToSlug(newname);
+    console.log("new page url is ::: ", urlslug);
+    
     const creator_name = req.headers.user;
 
     const [the_template] = await pool.query(
