@@ -1566,6 +1566,14 @@ app.post("/api/addnewpage", async (req, res) => {
 
     console.log(the_template[0].content, newname, creator_name);
 
+    const [checkexisting] = await pool.query(
+      "SELECT * FROM pages WHERE page_name = ?",
+      [newname]
+    );
+    if (checkexisting.length > 0) {
+      return res.status(500).json({ message: "page already exists !" });
+    }
+
     const insertResult = await pool.query(
       "INSERT INTO pages (page_name, content, author, url, template_name) VALUES (?, ?, ?, ?, ?)",
       [
