@@ -917,8 +917,8 @@ app.post(
     next();
   },
   upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "video", maxCount: 1 },
+    { name: "image", maxCount: 50 },
+    { name: "video", maxCount: 50 },
   ]),
   async (req, res) => {
     try {
