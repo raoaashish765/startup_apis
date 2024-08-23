@@ -932,7 +932,13 @@ app.post(
 
       // Check if image file is uploaded
       if (files.image && files.image.length > 0) {
-        uploadedFiles = req.theCurrDate; // Assuming you want to store the generated filename
+        // uploadedFiles = req.theCurrDate; // Assuming you want to store the generated filename
+        uploadedFiles.image = files.image.map(file => ({
+          filename: file.filename,
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size
+        }));
       }
 
       // Check if video file is uploaded
