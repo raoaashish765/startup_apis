@@ -71,8 +71,10 @@ app.get("/pages/:pageid", async (req, res) => {
   const pageid = req.params.pageid; // Get secid from URL parameter
 
   try {
-    const [rows] = await pool.query("SELECT * FROM pages WHERE page_name = ?", [pageid]);
-    
+    const [rows] = await pool.query("SELECT * FROM pages WHERE page_name = ?", [
+      pageid,
+    ]);
+
     // return res.json(rows.length);
 
     if (rows.length === 0) {
@@ -933,22 +935,22 @@ app.post(
       // Check if image file is uploaded
       if (files.image && files.image.length > 0) {
         // uploadedFiles = req.theCurrDate; // Assuming you want to store the generated filename
-        uploadedFiles.image = files.image.map(file => ({
+        uploadedFiles.image = files.image.map((file) => ({
           filename: file.filename,
           originalname: file.originalname,
           mimetype: file.mimetype,
-          size: file.size
+          size: file.size,
         }));
       }
 
       // Check if video file is uploaded
       if (files.video && files.video.length > 0) {
         // uploadedFiles = req.theCurrDate; // Assuming you want to store the generated filename
-        uploadedFiles.video = files.video.map(file => ({
+        uploadedFiles.video = files.video.map((file) => ({
           filename: file.filename,
           originalname: file.originalname,
           mimetype: file.mimetype,
-          size: file.size
+          size: file.size,
         }));
       }
 
@@ -1548,27 +1550,25 @@ app.get("/api/alltemplates", async (req, res) => {
   }
 });
 
-
 function convertToSlug(text) {
   return text
-      .toString()                     // Convert to string
-      .toLowerCase()                 // Convert to lowercase
-      .normalize('NFD')              // Normalize unicode characters
-      .replace(/[\u0300-\u036f]/g, '') // Remove accents
-      .replace(/[^a-z0-9 -]/g, '')   // Remove invalid characters
-      .replace(/\s+/g, '-')          // Replace spaces with dashes
-      .replace(/-+/g, '-');          // Replace multiple dashes with a single dash
+    .toString() // Convert to string
+    .toLowerCase() // Convert to lowercase
+    .normalize("NFD") // Normalize unicode characters
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^a-z0-9 -]/g, "") // Remove invalid characters
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/-+/g, "-"); // Replace multiple dashes with a single dash
 }
-
 
 app.post("/api/addnewpage", async (req, res) => {
   try {
     console.log("add new page called...");
-    
+
     const { newname, selecttemp } = req.body;
     const urlslug = convertToSlug(newname);
     console.log("new page url is ::: ", urlslug);
-    
+
     const creator_name = req.headers.user;
 
     const [the_template] = await pool.query(
@@ -1623,6 +1623,31 @@ app.post("/api/thepagesdel", async (req, res) => {
   } catch (error) {
     console.error("Error adding category:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/checkthelogintoken", async (req, res) => {
+  const userToken = req.headers["user"]; // Retrieve token from headers
+
+  if (!userToken) {
+    return res.status(400).json({ error: "No token provided" });
+  }
+
+  try {
+    const [existingUsers] = await pool.query(
+      "SELECT * FROM users WHERE api_token = ?",
+      [userToken]
+    );
+    console.log(existingUsers);
+
+    if (existingUsers.length == 0 || existingUsers.length > 1) {
+      console.log("User token didn't exists.......");
+      console.log(existingUsers.length);
+      return res.status(400).json({ message: "User token didn't exists." });
+    }
+    return res.status(200).json({ message: "User verified." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
