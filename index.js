@@ -1626,7 +1626,7 @@ app.post("/api/thepagesdel", async (req, res) => {
   }
 });
 
-app.post("/checkthelogintoken", async (req, res) => {
+app.post("/api/checkthelogintoken", async (req, res) => {
   const userToken = req.headers["user"]; // Retrieve token from headers
 
   if (!userToken) {
